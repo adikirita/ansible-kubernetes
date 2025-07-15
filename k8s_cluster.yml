@@ -1,0 +1,7 @@
+---
+- name: Automate the installation of Kubernetes cluster with Ansible
+  hosts: k8s_nodes
+  gather_facts: false
+  become: true
+  roles:
+   - k8s_cluster 
