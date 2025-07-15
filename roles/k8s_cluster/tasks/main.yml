@@ -1,7 +1,4 @@
 ---
-   - name: Ping the k8s for testing the connectivity
-     ansible.builtin.ping:
+- name: Ping the k8s for testing the connectivity
+  ansible.builtin.ping:
 
-   - name: Print the Hello Adrian mesaje
-     ansible.builtin.debug:
-      msg: "Hello Adrian"
