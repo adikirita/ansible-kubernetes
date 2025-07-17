@@ -1,0 +1,12 @@
+- name: Initializing master node
+  shell: kubeadm init --pod-network-cidr=10.200.0.0/16 --apiserver-advertise-address=192.168.200.154
+  register: init_output
+#  ignore_errors: true
+
+- name: Combined kubeadm output
+  debug:
+   msg: |
+    {{ init_output.stdout_lines | join('\n') }}
+
+- name: export kubectl config
+  shell: export KUBECONFIG=/etc/kubernetes/admin.conf

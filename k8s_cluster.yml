@@ -5,3 +5,8 @@
   become: true
   roles:
    - k8s_cluster 
+
+- name: Initialize the master node
+  hosts: master-node
+  roles:
+   - master_init

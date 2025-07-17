@@ -26,7 +26,7 @@
   shell: |
    modprobe overlay
    modprobe br_netfilter 
-   systemctl --system
+   sysctl --system
 
 - name: Remove packages that may conflict with Docker Engine 
   shell: |
@@ -61,4 +61,45 @@
    | sudo tee /etc/containerd/config.toml
    systemctl restart containerd
 
+- name: Install required packages for Kubernetes repository
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+    state: present
+    update_cache: yes
 
+#- name: Downloading the public signing key for the Kubernetes package repositories
+#  shell: |
+#   curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+- name: Downloading the public key for Kubernetes package repositories
+  ansible.builtin.get_url:
+   url: https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key
+   dest: /tmp/kubernetes-release.key
+
+- name: Converting the key in gpg
+  ansible.builtin.command: 
+   cmd: gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-release.key
+  args:
+   creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+- name: Adding the appropriate Kubernetes apt repository
+  ansible.builtin.shell:
+   echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+- name: Updating the apt package index and install kubelet kubeadm and kubectl
+  ansible.builtin.apt:
+   name: 
+     - kubelet 
+     - kubeadm  
+     - kubectl
+   state: present
+   update_cache: yes
+
+- name: Enable the kubelet service before running kubeadm and mark hold kubelete kubectl and kubeadm
+  ansible.builtin.shell: |
+   apt-mark hold kubelet kubeadm kubectl
+   systemctl enable --now kubelet
