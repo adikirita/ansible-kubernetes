@@ -10,3 +10,8 @@
   hosts: master-node
   roles:
    - master_init
+
+ - name: Installing Helm on master-node
+   hosts: master-node
+   roles:
+   - helm_install
